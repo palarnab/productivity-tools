@@ -1,0 +1,13 @@
+# 1. Dump the current database
+mongodump --uri="<OLD_MONGODB_URI>" --db=lmsdb --out=.\dump
+
+# 2. Restore into the new (M10+/dedicated) cluster
+mongorestore --uri="<NEW_MONGODB_URI>" --nsFrom="lmsdb.*" --nsTo="lmsdb.*" .\dump
+
+# 3. Point the app at the new cluster
+#    edit deploy/app/.env  ->  MONGODB_URI=<NEW_MONGODB_URI>   (MONGODB_DATABASE=lmsdb)
+
+# 4. Create the indexes / missing collections on the new cluster
+cd api; node scripts/create-indexes.js
+
+# 5. Redeploy / restart api, worker, scheduler

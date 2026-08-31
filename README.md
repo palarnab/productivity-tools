@@ -1,6 +1,7 @@
 # quick-sys-management
 
-A small collection of utility scripts for quick system and database management tasks. Scripts are grouped by domain: MongoDB maintenance helpers and Windows disk-usage tooling.
+A small collection of utility scripts and tools for quick system and database management tasks.
+Items are grouped by domain: MongoDB maintenance helpers and Windows desktop/disk tooling.
 
 ## Repository layout
 
@@ -9,13 +10,22 @@ MongoDb/
   db-usage.js       # Inspect MongoDB namespace/collection usage (Node.js)
   db-migration.txt  # Cheat sheet for migrating a database between clusters
   md-to-html.mjs    # Convert a Markdown file to a styled, print-ready HTML page
+  usage-guide.md    # How to use the MongoDb helpers
 Windows/
-  Find-LargeFolders.ps1  # Report the largest folders and files on a drive (PowerShell)
+  Find-LargeFolders/
+    Find-LargeFolders.ps1  # Report the largest folders and files on a drive (PowerShell)
+    usage-guide.md         # How to run Find-LargeFolders
+  PresentationNarrator/
+    usage-guide.md         # Turn slide decks into narrated, subtitled videos
+  ScreenRecorder/
+    usage-guide.md         # Tray-based Windows screen recorder
 ```
 
 ---
 
 ## MongoDb
+
+> Full walkthrough: [`MongoDb/usage-guide.md`](MongoDb/usage-guide.md).
 
 ### `db-usage.js`
 
@@ -72,7 +82,9 @@ The document `<title>` is derived from the input file name.
 
 ## Windows
 
-### `Find-LargeFolders.ps1`
+### `Find-LargeFolders`
+
+> Full walkthrough: [`Windows/Find-LargeFolders/usage-guide.md`](Windows/Find-LargeFolders/usage-guide.md).
 
 Scans a drive or folder and lists the top N largest immediate subfolders (size in GB and item count), followed by the top 10 largest individual files — handy for reclaiming disk space. Run as Administrator for full access to system folders.
 
@@ -97,6 +109,24 @@ Scans a drive or folder and lists the top N largest immediate subfolders (size i
 > Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 > ```
 
+### `PresentationNarrator`
+
+> Full walkthrough: [`Windows/PresentationNarrator/usage-guide.md`](Windows/PresentationNarrator/usage-guide.md).
+
+A Windows (WinForms) app that turns a slide deck (PowerPoint / PDF / HTML) into a narrated,
+subtitled MP4. It imports slides, prefills narration from PPTX speaker notes, synthesizes speech
+(offline Windows voice or cloud providers: OpenAI / ElevenLabs / Amazon Polly), burns in synced
+subtitles, and exports a stitched video. Requires FFmpeg (a full/GPL build with libass).
+
+### `ScreenRecorder`
+
+> Full walkthrough: [`Windows/ScreenRecorder/usage-guide.md`](Windows/ScreenRecorder/usage-guide.md).
+
+A lightweight, tray-based Windows screen recorder. Capture the full screen, a region, or a specific
+window with optional system and/or microphone audio, take screenshots, and losslessly stitch
+segments into a single video. Controlled from the system tray and global hotkeys; requires FFmpeg
+(a full/GPL build recommended).
+
 ---
 
 ## Requirements
@@ -104,3 +134,4 @@ Scans a drive or folder and lists the top N largest immediate subfolders (size i
 - **Node.js** (for `db-usage.js` and `md-to-html.mjs`) — ES modules are used, so Node 14+.
 - **MongoDB Database Tools** (`mongodump`, `mongorestore`) for the migration steps.
 - **PowerShell 5.1+** on Windows for `Find-LargeFolders.ps1`.
+- **Windows 10/11 + FFmpeg** (full/GPL build) for `PresentationNarrator` and `ScreenRecorder`.

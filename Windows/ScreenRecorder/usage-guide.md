@@ -11,7 +11,7 @@ A practical, copy-paste guide to installing, building, and using the Screen Reco
 
 ## Download
 
-**[Download ScreenRecorder-Setup-0.2.0.exe](https://github.com/palarnab/quick-sys-management/releases/download/SR-0.2/ScreenRecorder-Setup-0.2.0.exe)** — the latest Windows installer.
+**[Download ScreenRecorder-Setup-0.2.0.exe](https://github.com/palarnab/productivity-tools/releases/download/SR-0.2/ScreenRecorder-Setup-0.2.0.exe)** — the latest Windows installer.
 
 ---
 

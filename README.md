@@ -1,4 +1,4 @@
-# quick-sys-management
+# productivity-tools
 
 A small collection of utility scripts and tools for quick system and database management tasks.
 Items are grouped by domain: MongoDB maintenance helpers and Windows desktop/disk tooling.

@@ -11,7 +11,7 @@ status. Product/architecture background lives in the companion docs
 
 ## Download
 
-**[Download PresentationNarrator-Setup-0.3.0.exe](https://github.com/palarnab/quick-sys-management/releases/download/PN-0.3/PresentationNarrator-Setup-0.3.0.exe)** — the latest Windows installer.
+**[Download PresentationNarrator-Setup-0.3.0.exe](https://github.com/palarnab/productivity-tools/releases/download/SR-0.2/ScreenRecorder-Setup-0.2.0.exe)** — the latest Windows installer.
 
 ---
 

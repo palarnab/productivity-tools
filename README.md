@@ -6,6 +6,10 @@ Items are grouped by domain: MongoDB maintenance helpers and Windows desktop/dis
 ## Repository layout
 
 ```
+Github/
+  PullAll/
+    pullall.ps1     # Sync every sibling git repo's main branch (PowerShell)
+    usage-guide.md  # How to run PullAll
 MongoDb/
   db-usage.js       # Inspect MongoDB namespace/collection usage (Node.js)
   db-migration.txt  # Cheat sheet for migrating a database between clusters
@@ -20,6 +24,32 @@ Windows/
   ScreenRecorder/
     usage-guide.md         # Tray-based Windows screen recorder
 ```
+
+---
+
+## Github
+
+### `PullAll`
+
+> Full walkthrough: [`Github/PullAll/usage-guide.md`](Github/PullAll/usage-guide.md).
+
+Syncs the `main` branch of every git repository directly under a root folder. For each sibling repo it fetches (`--prune`), fast-forwards `main` with `--ff-only`, and switches back to the branch you started on (only if it still exists on `origin`). It never runs destructive commands — a repo with a dirty tree, conflict, or diverged history is reported as **Needs attention** and the script keeps going.
+
+**Usage**
+
+```powershell
+.\pullall.ps1                      # sync every repo under the script's folder
+.\pullall.ps1 -Root "C:\git"       # scan a different root folder
+.\pullall.ps1 -Parallel            # process repos in parallel (PowerShell 7+)
+```
+
+**Parameters**
+
+| Parameter | Default | Description |
+| --- | --- | --- |
+| `-Root` | script folder | Folder whose immediate child directories are scanned for git repos. |
+| `-MainBranch` | `main` | Name of the primary branch to pull. |
+| `-Parallel` | off | Process repos in parallel (requires PowerShell 7+; falls back to sequential on 5.1). |
 
 ---
 
@@ -133,5 +163,6 @@ segments into a single video. Controlled from the system tray and global hotkeys
 
 - **Node.js** (for `db-usage.js` and `md-to-html.mjs`) — ES modules are used, so Node 14+.
 - **MongoDB Database Tools** (`mongodump`, `mongorestore`) for the migration steps.
-- **PowerShell 5.1+** on Windows for `Find-LargeFolders.ps1`.
+- **PowerShell 5.1+** on Windows for `Find-LargeFolders.ps1` and `pullall.ps1` (PowerShell 7+ for `pullall.ps1 -Parallel`).
+- **Git** on PATH for `pullall.ps1`.
 - **Windows 10/11 + FFmpeg** (full/GPL build) for `PresentationNarrator` and `ScreenRecorder`.

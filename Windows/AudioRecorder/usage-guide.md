@@ -4,6 +4,10 @@
 > For build/packaging instructions see [`5-usage-guide.md`](5-usage-guide.md); for the internals
 > behind each feature see [`4-features.md`](4-features.md).
 
+## Download
+
+**[Download AudioRecorder-Setup-0.1.0.exe](https://github.com/palarnab/productivity-tools/releases/download/AR-0.1/AudioRecorder-Setup-0.1.0.exe)** — the latest Windows installer.
+
 ---
 
 ## Table of contents

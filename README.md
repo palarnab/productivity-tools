@@ -18,6 +18,8 @@ MongoDb/
 Windows/
   AudioRecorder/
     usage-guide.md         # Tray-based system + microphone audio recorder
+  ContentStudio/
+    usage-guide.md         # Timeline video editor with text, image, and audio overlays
   Find-LargeFolders/
     Find-LargeFolders.ps1  # Report the largest folders and files on a drive (PowerShell)
     usage-guide.md         # How to run Find-LargeFolders
@@ -124,6 +126,17 @@ review player, crash-safe segmented recording with stitching, and export to M4A 
 with optional EBU R128 loudness normalization. Requires FFmpeg (a full/GPL build for MP3 and
 `loudnorm` support).
 
+### `ContentStudio`
+
+> Full walkthrough: [`Windows/ContentStudio/usage-guide.md`](Windows/ContentStudio/usage-guide.md).
+
+A Windows video editor built around a clip timeline: import media, join and reorder clips, trim
+in/out points, and layer text, image/logo, and audio tracks (mix or replace, with looping and
+volume). Exports to a chosen container/codec/aspect/quality with optional hardware encoding
+(NVENC / QuickSync / AMF) and −14 LUFS loudness normalization, plus utilities for frame grabs,
+chapter lists, and stream extraction. Projects save as `.vproj`. Requires FFmpeg (a full/GPL build
+with `drawtext`/libfreetype).
+
 ### `Find-LargeFolders`
 
 > Full walkthrough: [`Windows/Find-LargeFolders/usage-guide.md`](Windows/Find-LargeFolders/usage-guide.md).
@@ -177,4 +190,4 @@ segments into a single video. Controlled from the system tray and global hotkeys
 - **MongoDB Database Tools** (`mongodump`, `mongorestore`) for the migration steps.
 - **PowerShell 5.1+** on Windows for `Find-LargeFolders.ps1` and `pullall.ps1` (PowerShell 7+ for `pullall.ps1 -Parallel`).
 - **Git** on PATH for `pullall.ps1`.
-- **Windows 10/11 + FFmpeg** (full/GPL build) for `AudioRecorder`, `PresentationNarrator`, and `ScreenRecorder`.
+- **Windows 10/11 + FFmpeg** (full/GPL build) for `AudioRecorder`, `ContentStudio`, `PresentationNarrator`, and `ScreenRecorder`.

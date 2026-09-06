@@ -16,6 +16,8 @@ MongoDb/
   md-to-html.mjs    # Convert a Markdown file to a styled, print-ready HTML page
   usage-guide.md    # How to use the MongoDb helpers
 Windows/
+  AudioRecorder/
+    usage-guide.md         # Tray-based system + microphone audio recorder
   Find-LargeFolders/
     Find-LargeFolders.ps1  # Report the largest folders and files on a drive (PowerShell)
     usage-guide.md         # How to run Find-LargeFolders
@@ -112,6 +114,16 @@ The document `<title>` is derived from the input file name.
 
 ## Windows
 
+### `AudioRecorder`
+
+> Full walkthrough: [`Windows/AudioRecorder/usage-guide.md`](Windows/AudioRecorder/usage-guide.md).
+
+A tray-based Windows audio recorder that captures system sound and one or more microphones —
+as a single mixed track or as separate per-source tracks. Includes live level meters, a waveform
+review player, crash-safe segmented recording with stitching, and export to M4A (AAC), MP3, or WAV
+with optional EBU R128 loudness normalization. Requires FFmpeg (a full/GPL build for MP3 and
+`loudnorm` support).
+
 ### `Find-LargeFolders`
 
 > Full walkthrough: [`Windows/Find-LargeFolders/usage-guide.md`](Windows/Find-LargeFolders/usage-guide.md).
@@ -165,4 +177,4 @@ segments into a single video. Controlled from the system tray and global hotkeys
 - **MongoDB Database Tools** (`mongodump`, `mongorestore`) for the migration steps.
 - **PowerShell 5.1+** on Windows for `Find-LargeFolders.ps1` and `pullall.ps1` (PowerShell 7+ for `pullall.ps1 -Parallel`).
 - **Git** on PATH for `pullall.ps1`.
-- **Windows 10/11 + FFmpeg** (full/GPL build) for `PresentationNarrator` and `ScreenRecorder`.
+- **Windows 10/11 + FFmpeg** (full/GPL build) for `AudioRecorder`, `PresentationNarrator`, and `ScreenRecorder`.

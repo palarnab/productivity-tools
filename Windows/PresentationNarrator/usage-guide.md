@@ -11,7 +11,15 @@ status. Product/architecture background lives in the companion docs
 
 ## Download
 
-**[Download PresentationNarrator-Setup-0.3.0.exe](https://github.com/palarnab/productivity-tools/releases/download/PN-0.3/PresentationNarrator-Setup-0.3.0.exe)** — the latest Windows installer.
+**[Download PresentationNarrator-Setup-0.4.0.exe](https://github.com/palarnab/productivity-tools/releases/download/PN-0.4/PresentationNarrator-Setup-0.4.0.exe)** — the latest Windows installer.
+
+---
+
+## What's new in 0.4.0
+
+- **Per-slide audio file — bring your own narration.** Any slide can play a supplied recording
+  *instead of* the synthesized voice, with optional captions, unchanged silence padding, and no
+  cloud cost. See [4.9 Use your own audio for a slide](#49-use-your-own-audio-for-a-slide).
 
 ---
 
@@ -161,12 +169,40 @@ Still in **Tools → Settings…**:
   music volume (dB), and **Duck music under narration**.
 - **Export:** frame rate and quality (0 best … 40).
 
-### 4.9 Export
+### 4.9 Use your own audio for a slide
+
+Instead of the synthesized voice, a slide can play a recording you supply. With the slide selected,
+click **Audio file…** in the narrative editor and pick an `.mp3`, `.wav`, `.m4a`, `.aac`, `.flac`,
+`.ogg`, `.opus`, `.wma`, or `.aiff`. The file is copied into the project (`assets/audio/`) so the
+`.pnproj` stays self-contained and portable.
+
+- **Subtitles are still available, and optional.** Keep text in the **Narrative** box and it is used
+  for captions only; cue times are estimated across the measured audio length (an imported file
+  carries no word timings). Clear the text for audio with no captions.
+- **Leading / trailing silence still applies**, from the global settings or the per-slide overrides —
+  imported audio is padded exactly like synthesized narration.
+- **No cloud cost.** Slides with their own audio are excluded from the export cost estimate and
+  never reach a paid TTS engine.
+- **Mixed decks work:** some slides voiced by a provider, others by your own recordings.
+- **▶ Preview narration** plays the attached file, and such slides are marked 🔊 in the navigator.
+  **Clear** returns a slide to the narrator voice.
+
+Notes:
+
+- Existing projects open unchanged — the new field is optional and omitted when unused.
+- Imported audio is decoded once to the project's standard 48 kHz stereo track and cached; replacing
+  the file re-imports it automatically, and moving the project folder does not invalidate the cache.
+- If an attached file goes missing, that slide falls back to synthesizing its narrative text and the
+  export log notes it — the export does not fail.
+- Requires the bundled FFmpeg (already a prerequisite) to decode the audio formats above.
+
+### 4.10 Export
 
 **Tools → Export video…**. If the project uses a **cloud** provider and has slides needing
 (re)synthesis, a **confirmation dialog** first shows the provider, slide/character counts, an
 **approximate cost**, and a **key-validation** result — you must confirm before any paid work
-happens. Choose an output `.mp4`; a progress bar tracks the run, and you can open the finished video.
+happens. Slides with a supplied audio file are not counted. Choose an output `.mp4`; a progress bar
+tracks the run, and you can open the finished video.
 
 ---
 
@@ -181,6 +217,7 @@ A project is a self-contained folder:
     source/             # the imported .pptx/.pdf/.html (copied in)
     slides/             # rendered slide images (PNG)
     video/              # inserted clips (copied in)
+    audio/              # per-slide narration files you supplied (copied in)
     cache/              # rendered narration audio, reused on re-export
     music/              # background-music file (if added)
 ```
@@ -278,6 +315,8 @@ After a run, inspect `C:\tmp\pntest\selftest.log` and the exported `output.mp4`.
 | **Cloud export costs a surprise** | Many stale cloud slides | The pre-export dialog shows character/cost estimate; only changed slides are (re)billed thanks to caching. |
 | **Subtitles unreadable on light slides** | *(Fixed)* Text used to blend into bright backgrounds | Resolved: captions render on an **opacity-controlled black box** (`Subtitles/AssWriter.cs`, `BorderStyle=3`). Increase background opacity in Settings if needed. |
 | **Inserted video audio too loud/quiet vs. narration** | No automatic loudness matching yet | Adjust the clip's volume (dB); see [`3-roadmap.md`](3-roadmap.md) C3. |
+| **A slide with an attached audio file used the narrator voice instead** | The file was moved/deleted outside the app | The slide falls back to synthesizing its narrative text and the export log notes it. Re-attach via **Audio file…**. |
+| **Captions drift on a slide with supplied audio** | Imported files carry no word timings, so cues are estimated across the measured length | Split long narration across slides, or shorten the caption text. |
 
 ---
 
@@ -285,8 +324,9 @@ After a run, inspect `C:\tmp\pntest\selftest.log` and the exported `output.mp4`.
 
 1. **New project** → 2. **Import** (PPTX/PDF/HTML) → 3. **edit narrative** → 4. **set voice +
 articulation** (global) and **per-slide overrides** → 5. **Preview** → 6. **Insert video** →
-7. **Settings** (subtitles/transitions/music/pronunciation) → 8. **Export** (confirm the cloud
-cost/validation dialog if using cloud voices).
+7. **Settings** (subtitles/transitions/music/pronunciation) → 8. **attach your own audio** where you
+prefer a real recording → 9. **Export** (confirm the cloud cost/validation dialog if using cloud
+voices).
 
 The offline path (Windows voice + built-in renderer + subtitles + export) needs **only FFmpeg with
 libass** — everything else is optional fidelity/quality upgrades.

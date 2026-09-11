@@ -11,7 +11,15 @@ A practical, copy-paste guide to installing, building, and using the Screen Reco
 
 ## Download
 
-**[Download ScreenRecorder-Setup-0.3.0.exe](https://github.com/palarnab/productivity-tools/releases/download/SR-0.3/ScreenRecorder-Setup-0.3.0.exe)** — the latest Windows installer.
+**[Download ScreenRecorder-Setup-0.4.0.exe](https://github.com/palarnab/productivity-tools/releases/download/SR-0.4/ScreenRecorder-Setup-0.4.0.exe)** — the latest Windows installer.
+
+---
+
+## What's new in 0.4.0
+
+- **Circular webcam overlay.** A round cut-out of a DirectShow camera is composited on top of the
+  recording, so you can talk to camera while demoing. See
+  [Circular webcam overlay](#circular-webcam-overlay) below.
 
 ---
 
@@ -175,6 +183,29 @@ size), release to confirm, or press **Esc** to cancel.
 **Right-click → Audio → None / System sound / Microphone / System + Mic.** System audio uses WASAPI
 loopback (no driver needed). If a chosen source can't initialize, recording continues without audio.
 
+### Circular webcam overlay
+Open **Settings → Webcam** to composite a round cut-out of a DirectShow camera on top of the
+recording — handy for talking to camera while demoing. Pair it with **Audio → Mic** (or **Both**)
+to narrate.
+
+| Option | What it does |
+|---|---|
+| **Enable webcam overlay** | Off by default; when off, the FFmpeg command is exactly as before |
+| **Camera** | Which DirectShow camera to use |
+| **Corner** | Which corner of the video the circle sits in |
+| **Diameter** | Circle size as a percentage of the video height |
+| **Distance from the edges** | Margin between the circle and the video edges |
+
+The overlay is composited in the **same FFmpeg process** as the screen capture, so segments keep
+identical resolution/codec/fps and lossless stitching is unaffected.
+
+**It never breaks a recording.** The camera is resolved and test-opened before FFmpeg starts. If it
+is missing, in use by another app, or the mask image can't be written, the session records normally
+**without** the circle instead of failing.
+
+> Camera detection and the "can this camera be opened" check are cached for **two minutes**, so
+> back-to-back recordings start instantly while unplugging or freeing a camera is still noticed.
+
 ### Pause / resume
 Press **`Ctrl+Alt+P`** or use the menu. (Pausing finalizes the current segment and resuming starts
 a new one; the stitched output is still seamless.)
@@ -239,6 +270,7 @@ Open **Right-click → Settings…**. Stored at `%AppData%\ScreenRecorder\settin
 | **Quality** | 0 (best) – 51 (worst); maps to CRF/CQ/QP per encoder | 20 |
 | **Segment length** | Seconds per segment (10–600) | 60 |
 | **Prefer hardware encoder** | Steer the probe toward NVENC/QuickSync/AMF | On |
+| **Webcam overlay** | Composite a circular camera cut-out (corner, diameter %, edge distance) | Off |
 | **Auto-stitch on stop** | Stitch immediately when recording stops | Off |
 | **Start with Windows** | Per-user run-at-login (`HKCU\...\Run`) | Off |
 | **Re-detect encoders** | Re-run capability probing (after adding FFmpeg or changing hardware) | — |
@@ -278,6 +310,14 @@ session is active.
 ```
 
 The log reports whether an audio track exists and its measured loudness (silent / quiet / audible).
+
+### The webcam circle didn't appear
+- The overlay degrades silently by design: if the camera is unplugged, already in use by another
+  app (Teams/Zoom/browser), or the mask image can't be written, the session records **without** the
+  circle rather than failing. Close whatever is holding the camera and start a new session.
+- Results are cached for **two minutes** — after plugging a camera in or freeing it, allow up to
+  that long (or reopen **Settings → Webcam**) before the next recording picks it up.
+- A **full/GPL** FFmpeg build is required (the overlay uses `dshow`).
 
 ### WGC unavailable (window capture)
 - Windows Graphics Capture needs Windows 10 1903+ (and a working D3D11 device). On older builds,

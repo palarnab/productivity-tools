@@ -7,6 +7,9 @@ Items are grouped by domain: MongoDB maintenance helpers and Windows desktop/dis
 
 ```
 Github/
+  CleanBranches/
+    cleanbranches.ps1 # Delete stale local branches in every sibling git repo (PowerShell)
+    usage-guide.md    # How to run CleanBranches
   PullAll/
     pullall.ps1     # Sync every sibling git repo's main branch (PowerShell)
     usage-guide.md  # How to run PullAll
@@ -32,6 +35,32 @@ Windows/
 ---
 
 ## Github
+
+### `CleanBranches`
+
+> Full walkthrough: [`Github/CleanBranches/usage-guide.md`](Github/CleanBranches/usage-guide.md).
+
+Deletes stale **local** branches in every git repository directly under a root folder — the companion to `PullAll`. For each repo it fetches (`--prune`), then removes branches that are already merged into `origin/main` or whose upstream is gone (squash-merged, deleted PR branches). Protected, active, and unpushed local-only branches are kept. It is a **dry run by default** (pass `-Apply` to delete), never touches the working tree, and prints the SHA of every deleted branch so it can be restored with `git checkout -b <name> <sha>`.
+
+**Usage**
+
+```powershell
+.\cleanbranches.ps1                                       # dry run - report only
+.\cleanbranches.ps1 -Apply                                # delete merged + gone-upstream branches
+.\cleanbranches.ps1 -SwitchToMain -IncludeUnmerged -Apply # aggressive cleanup
+```
+
+**Parameters**
+
+| Parameter | Default | Description |
+| --- | --- | --- |
+| `-Root` | script folder | Folder whose immediate child directories are scanned for git repos. |
+| `-MainBranch` | `main` | Name of the primary branch used as the merge base. |
+| `-Keep` | `master`, `develop`, `dev`, `release/*`, `release-*`, `hotfix/*`, `hotfix-*` | Wildcard patterns for branches that must never be deleted. |
+| `-IncludeUnmerged` | off | Also delete local-only branches that are not merged into main (can lose unpushed work). |
+| `-SwitchToMain` | off | Check out main first (only if the tree is clean) so the current branch becomes eligible. |
+| `-Apply` | off | Actually delete; without it the script only reports. |
+| `-Parallel` | off | Process repos in parallel (requires PowerShell 7+; falls back to sequential on 5.1). |
 
 ### `PullAll`
 
@@ -188,6 +217,6 @@ segments into a single video. Controlled from the system tray and global hotkeys
 
 - **Node.js** (for `db-usage.js` and `md-to-html.mjs`) — ES modules are used, so Node 14+.
 - **MongoDB Database Tools** (`mongodump`, `mongorestore`) for the migration steps.
-- **PowerShell 5.1+** on Windows for `Find-LargeFolders.ps1` and `pullall.ps1` (PowerShell 7+ for `pullall.ps1 -Parallel`).
-- **Git** on PATH for `pullall.ps1`.
+- **PowerShell 5.1+** on Windows for `Find-LargeFolders.ps1`, `pullall.ps1`, and `cleanbranches.ps1` (PowerShell 7+ for the `-Parallel` switch).
+- **Git** on PATH for `pullall.ps1` and `cleanbranches.ps1`.
 - **Windows 10/11 + FFmpeg** (full/GPL build) for `AudioRecorder`, `ContentStudio`, `PresentationNarrator`, and `ScreenRecorder`.

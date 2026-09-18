@@ -8,13 +8,15 @@
       2. Classifies every local branch:
            - Protected           : main branch, current branch, or matches -Keep.
            - Merged              : already merged into origin/<main> (safe `git branch -d`).
-           - Gone                : had an upstream that no longer exists on origin
-                                   (typically squash-merged & deleted PR branches).
+           - Gone                : had an upstream that no longer exists on origin.
+           - Squash-merged       : no upstream and not an ancestor of main, but its
+                                   whole diff is already in main (the usual state of
+                                   `gh pr checkout` branches after a squash merge).
            - Active              : upstream still exists on origin -> kept.
-           - Local-only unmerged : no upstream, unmerged work -> kept unless
+           - Local-only unmerged : no upstream, real unmerged work -> kept unless
                                    -IncludeUnmerged is given.
-      3. Deletes the Merged + Gone branches (and local-only ones with
-         -IncludeUnmerged).
+      3. Deletes the Merged + Gone + Squash-merged branches (and local-only ones
+         with -IncludeUnmerged).
 
     DRY RUN BY DEFAULT: nothing is deleted unless you pass -Apply.
     Deleted SHAs are printed so anything removed can be recovered with
@@ -36,8 +38,12 @@
     Defaults to master/develop/dev/release-*/hotfix-* style branches.
 
 .PARAMETER IncludeUnmerged
-    Also delete local-only branches (no upstream) that are NOT merged into main.
+    Also delete local-only branches (no upstream) whose content is NOT in main.
     This is the only option that can lose work that was never pushed.
+
+.PARAMETER SkipSquashCheck
+    Disable squash-merge detection (the extra per-branch patch-id comparison).
+    Squash-merged branches are then treated as plain unmerged local branches.
 
 .PARAMETER SwitchToMain
     Check out the main branch first (only if the tree is clean) so the branch you
@@ -68,6 +74,7 @@ param(
     [string]$MainBranch = 'main',
     [string[]]$Keep = @('master', 'develop', 'dev', 'release/*', 'release-*', 'hotfix/*', 'hotfix-*'),
     [switch]$IncludeUnmerged,
+    [switch]$SkipSquashCheck,
     [switch]$SwitchToMain,
     [switch]$Apply,
     [switch]$Parallel
@@ -81,6 +88,7 @@ $repoScript = {
         [string]$MainBranch,
         [string[]]$Keep,
         [bool]$IncludeUnmerged,
+        [bool]$SkipSquashCheck,
         [bool]$SwitchToMain,
         [bool]$Apply
     )
@@ -101,6 +109,21 @@ $repoScript = {
         }
         Log ("DONE ({0:n1}s): {1} - {2}" -f $sw.Elapsed.TotalSeconds, $status, $detail) $color
         [pscustomobject]@{ Repo = $name; Status = $status; Deleted = $deleted; Kept = $kept; Detail = $detail }
+    }
+
+    # A squash merge rewrites the branch into one new commit, so `branch --merged`
+    # cannot see it. Replay the branch tree as a single commit on the merge base and
+    # ask git-cherry whether an equivalent patch already exists upstream ('-' = yes).
+    function Test-SquashMerged($branch, $baseRef) {
+        $mergeBase = git -C $Path merge-base $baseRef $branch 2>$null
+        if ($LASTEXITCODE -ne 0 -or -not $mergeBase) { return $false }
+        $tree = git -C $Path rev-parse "$branch^{tree}" 2>$null
+        if ($LASTEXITCODE -ne 0 -or -not $tree) { return $false }
+        $probe = git -C $Path commit-tree $tree.Trim() -p $mergeBase.Trim() -m 'squash-probe' 2>$null
+        if ($LASTEXITCODE -ne 0 -or -not $probe) { return $false }
+        $cherry = @(git -C $Path cherry $baseRef $probe.Trim() 2>$null)
+        if ($LASTEXITCODE -ne 0 -or $cherry.Count -eq 0) { return $false }
+        return ($cherry[0].Trim().StartsWith('-'))
     }
 
     # Is this actually a git work tree?
@@ -182,6 +205,9 @@ $repoScript = {
         elseif ($isGone) {
             $toDelete += @{ Name = $branch; Sha = $sha; Reason = 'upstream gone'; Force = $true }
         }
+        elseif (-not $upstream -and -not $SkipSquashCheck -and (Test-SquashMerged $branch $baseRef)) {
+            $toDelete += @{ Name = $branch; Sha = $sha; Reason = "squash-merged into $baseRef"; Force = $true }
+        }
         elseif (-not $upstream -and $IncludeUnmerged) {
             $toDelete += @{ Name = $branch; Sha = $sha; Reason = 'local-only, unmerged'; Force = $true }
         }
@@ -253,7 +279,7 @@ $overall = [System.Diagnostics.Stopwatch]::StartNew()
 Write-Host ''
 Write-Host ("=== cleanbranches: {0} repo(s) under {1}  [{2}]  main='{3}' ===" -f $repoDirs.Count, $Root, $mode, $MainBranch) -ForegroundColor Cyan
 Write-Host ("Mode: {0}" -f $runMode) -ForegroundColor $(if ($Apply) { 'Yellow' } else { 'DarkGray' })
-Write-Host ("Keep: {0} | IncludeUnmerged: {1} | SwitchToMain: {2}" -f ($Keep -join ', '), [bool]$IncludeUnmerged, [bool]$SwitchToMain) -ForegroundColor DarkGray
+Write-Host ("Keep: {0} | IncludeUnmerged: {1} | SwitchToMain: {2} | SquashDetect: {3}" -f ($Keep -join ', '), [bool]$IncludeUnmerged, [bool]$SwitchToMain, (-not $SkipSquashCheck)) -ForegroundColor DarkGray
 Write-Host ("Repos: {0}" -f (($repoDirs | Select-Object -ExpandProperty Name) -join ', ')) -ForegroundColor DarkGray
 Write-Host ''
 
@@ -262,7 +288,7 @@ if ($Parallel -and $PSVersionTable.PSVersion.Major -ge 7) {
     $repoScriptText = $repoScript.ToString()
     $results = $repoDirs | ForEach-Object -ThrottleLimit 8 -Parallel {
         $sb = [ScriptBlock]::Create($using:repoScriptText)
-        & $sb $_.FullName $using:MainBranch $using:Keep ([bool]$using:IncludeUnmerged) ([bool]$using:SwitchToMain) ([bool]$using:Apply)
+        & $sb $_.FullName $using:MainBranch $using:Keep ([bool]$using:IncludeUnmerged) ([bool]$using:SkipSquashCheck) ([bool]$using:SwitchToMain) ([bool]$using:Apply)
     }
 }
 else {
@@ -271,7 +297,7 @@ else {
     $results = foreach ($dir in $repoDirs) {
         $i++
         Write-Host ("--- ({0}/{1}) {2} ---" -f $i, $total, $dir.Name) -ForegroundColor White
-        & $repoScript $dir.FullName $MainBranch $Keep ([bool]$IncludeUnmerged) ([bool]$SwitchToMain) ([bool]$Apply)
+        & $repoScript $dir.FullName $MainBranch $Keep ([bool]$IncludeUnmerged) ([bool]$SkipSquashCheck) ([bool]$SwitchToMain) ([bool]$Apply)
         Write-Host ("    ...{0}/{1} repos processed" -f $i, $total) -ForegroundColor DarkGray
     }
 }
